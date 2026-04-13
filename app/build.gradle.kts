@@ -62,8 +62,10 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-compiler:2.44")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
     
     // Room
     val room_version = "2.6.1"

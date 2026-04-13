@@ -6,9 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.taskflow.presentation.task_list.TaskListScreen
+import com.example.taskflow.presentation.task_list.TaskListViewModel
+import com.example.taskflow.presentation.theme.TaskFlowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -16,22 +20,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            TaskFlowTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("TaskFlow")
+                    val viewModel: TaskListViewModel = hiltViewModel()
+                    val state by viewModel.state.collectAsState()
+                    
+                    TaskListScreen(
+                        state = state,
+                        onSearchQueryChange = viewModel::onSearchQueryChange,
+                        onTaskClick = { /* TODO: Navigate to Edit */ },
+                        onStatusChange = viewModel::onStatusChange,
+                        onAddTaskClick = { /* TODO: Navigate to Add */ }
+                    )
                 }
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Welcome to $name!",
-        modifier = modifier
-    )
 }
