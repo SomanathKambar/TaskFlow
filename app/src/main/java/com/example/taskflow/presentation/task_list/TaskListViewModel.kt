@@ -2,6 +2,8 @@ package com.example.taskflow.presentation.task_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskflow.domain.model.Filter
+import com.example.taskflow.domain.model.SortType
 import com.example.taskflow.domain.model.Status
 import com.example.taskflow.domain.model.Task
 import com.example.taskflow.domain.usecase.*
@@ -18,30 +20,59 @@ class TaskListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery.asStateFlow()
+    private val _filter = MutableStateFlow<Filter?>(null)
+    private val _sortType = MutableStateFlow(SortType.CREATED_AT)
 
-    private val _state = MutableStateFlow(TaskListUiState())
-    val state = combine(
+    val state: StateFlow<TaskListUiState> = combine(
         getTasksUseCase(),
-        _searchQuery
-    ) { tasks, query ->
-        val filteredTasks = if (query.isBlank()) {
-            tasks
-        } else {
-            tasks.filter {
+        _searchQuery,
+        _filter,
+        _sortType
+    ) { tasks, query, filter, sort ->
+        var result = tasks
+
+        // 🔍 Search
+        if (query.isNotBlank()) {
+            result = result.filter {
                 it.title.contains(query, ignoreCase = true) ||
                 (it.description?.contains(query, ignoreCase = true) ?: false)
             }
         }
-        
+
+        // 🎯 Filter
+        filter?.let { f ->
+            result = result.filter { task ->
+                (f.category == null || task.category == f.category) &&
+                (f.priority == null || task.priority == f.priority) &&
+                (f.status == null || task.status == f.status)
+            }
+        }
+
+        // 🔄 Sorting
+        result = when (sort) {
+            SortType.PRIORITY -> result.sortedByDescending { it.priority.value }
+            SortType.DUE_DATE -> result.sortedBy { it.dueDate ?: Long.MAX_VALUE }
+            SortType.CREATED_AT -> result.sortedByDescending { it.createdAt }
+        }
+
         TaskListUiState(
-            tasks = filteredTasks.sortedByDescending { it.createdAt },
-            searchQuery = query
+            tasks = result,
+            searchQuery = query,
+            selectedFilter = filter,
+            sortType = sort
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskListUiState())
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
+    }
+
+    fun onFilterChange(filter: Filter?) {
+        _filter.value = filter
+    }
+
+    fun onSortChange(sort: SortType) {
+        _sortType.value = sort
     }
 
     fun onStatusChange(task: Task, newStatus: Status) {

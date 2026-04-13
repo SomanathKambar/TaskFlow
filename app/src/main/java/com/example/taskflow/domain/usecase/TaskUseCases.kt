@@ -16,6 +16,10 @@ class GetTasksUseCase @Inject constructor(private val repository: TaskRepository
     operator fun invoke() = repository.getTasks()
 }
 
+class GetTaskByIdUseCase @Inject constructor(private val repository: TaskRepository) {
+    suspend operator fun invoke(taskId: String) = repository.getTaskById(taskId)
+}
+
 class GetDeletedTasksUseCase @Inject constructor(private val repository: TaskRepository) {
     operator fun invoke() = repository.getDeletedTasks()
 }

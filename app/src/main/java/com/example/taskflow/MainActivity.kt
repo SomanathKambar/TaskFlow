@@ -15,9 +15,13 @@ import com.example.taskflow.presentation.task_list.TaskListViewModel
 import com.example.taskflow.presentation.theme.TaskFlowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.taskflow.presentation.task_detail.TaskDetailScreen
+import com.example.taskflow.presentation.task_detail.TaskDetailViewModel
 import com.example.taskflow.presentation.trash.TrashScreen
 import com.example.taskflow.presentation.trash.TrashViewModel
 
@@ -44,10 +48,24 @@ class MainActivity : ComponentActivity() {
                             TaskListScreen(
                                 state = state,
                                 onSearchQueryChange = viewModel::onSearchQueryChange,
-                                onTaskClick = { /* TODO: Navigate to Edit */ },
+                                onSortChange = viewModel::onSortChange,
+                                onTaskClick = { task -> navController.navigate("task_detail/${task.id}") },
                                 onStatusChange = viewModel::onStatusChange,
-                                onAddTaskClick = { /* TODO: Navigate to Add */ },
+                                onAddTaskClick = { navController.navigate("task_detail/new") },
                                 onTrashClick = { navController.navigate("trash") }
+                            )
+                        }
+                        composable(
+                            route = "task_detail/{taskId}",
+                            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                        ) {
+                            val viewModel: TaskDetailViewModel = hiltViewModel()
+                            val state by viewModel.state.collectAsState()
+                            
+                            TaskDetailScreen(
+                                state = state,
+                                onEvent = viewModel::onEvent,
+                                onBackClick = { navController.popBackStack() }
                             )
                         }
                         composable("trash") {
