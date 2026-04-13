@@ -61,7 +61,7 @@ class TaskListViewModel @Inject constructor(
             selectedFilter = filter,
             sortType = sort
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskListUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, TaskListUiState())
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query

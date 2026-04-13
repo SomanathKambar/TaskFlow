@@ -23,21 +23,39 @@ class AddTaskUseCaseTest {
 
     @Test
     fun `when adding a task, repository is called with the task`() = runTest {
-        val task = Task(
-            id = "1",
-            title = "Test Task",
-            description = null,
-            category = "Test",
-            priority = Priority.LOW,
-            status = Status.TODO,
-            dueDate = null,
-            createdAt = 123456789L
-        )
-        
+        val task = createSampleTask("Test Task")
         coEvery { repository.insertTask(any()) } just Runs
-        
         addTaskUseCase(task)
-        
         coVerify { repository.insertTask(task) }
     }
+
+    @Test
+    fun `when adding a task with empty title, it still calls repository`() = runTest {
+        // Business logic for validation usually lives in UseCase or ViewModel.
+        // Currently, our UseCase is a simple wrapper.
+        val task = createSampleTask("")
+        coEvery { repository.insertTask(any()) } just Runs
+        addTaskUseCase(task)
+        coVerify { repository.insertTask(task) }
+    }
+
+    @Test
+    fun `when adding a task with very long description, it still calls repository`() = runTest {
+        val longDescription = "a".repeat(1000)
+        val task = createSampleTask("Long Desc Task", longDescription)
+        coEvery { repository.insertTask(any()) } just Runs
+        addTaskUseCase(task)
+        coVerify { repository.insertTask(task) }
+    }
+
+    private fun createSampleTask(title: String, description: String? = null) = Task(
+        id = "1",
+        title = title,
+        description = description,
+        category = "Test",
+        priority = Priority.LOW,
+        status = Status.TODO,
+        dueDate = null,
+        createdAt = 123456789L
+    )
 }
