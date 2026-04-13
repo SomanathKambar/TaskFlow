@@ -29,6 +29,7 @@ class TaskDetailViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private var currentTaskId: String? = null
+    private var existingCreatedAt: Long? = null
 
     init {
         savedStateHandle.get<String>("taskId")?.let { taskId ->
@@ -43,6 +44,7 @@ class TaskDetailViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             getTaskByIdUseCase(taskId)?.let { task ->
                 currentTaskId = task.id
+                existingCreatedAt = task.createdAt
                 _state.update {
                     it.copy(
                         title = task.title,
@@ -54,7 +56,7 @@ class TaskDetailViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-            }
+            } ?: _state.update { it.copy(isLoading = false, error = "Task not found") }
         }
     }
 
@@ -100,7 +102,7 @@ class TaskDetailViewModel @Inject constructor(
                 priority = s.priority,
                 status = s.status,
                 dueDate = s.dueDate,
-                createdAt = System.currentTimeMillis()
+                createdAt = existingCreatedAt ?: System.currentTimeMillis()
             )
 
             if (currentTaskId == null) {

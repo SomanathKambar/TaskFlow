@@ -32,6 +32,11 @@ fun TaskListScreen(
     modifier: Modifier = Modifier
 ) {
     val today = Calendar.getInstance()
+    val filterOptions = listOf("All", "Work", "Personal", "Shopping", "General") +
+        state.tasks.map { it.category }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .filterNot { it in setOf("Work", "Personal", "Shopping", "General") }
     val todayTasks = state.tasks.filter { 
         it.dueDate != null && DateUtils.isToday(it.dueDate) 
     }
@@ -77,7 +82,7 @@ fun TaskListScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             FilterChips(
-                options = listOf("All", "Work", "Personal", "Shopping"),
+                options = filterOptions,
                 selectedOption = state.selectedFilter?.category,
                 onOptionSelected = onFilterChange,
                 modifier = Modifier.padding(horizontal = 16.dp)
