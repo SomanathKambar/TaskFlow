@@ -30,7 +30,7 @@ fun FilterSortBar(
             FilterChip(
                 selected = selectedSort == sort,
                 onClick = { onSortChange(sort) },
-                label = { Text(sort.name.replace("_", " ").lowercase().capitalize()) }
+                label = { Text(sort.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }) }
             )
         }
     }
