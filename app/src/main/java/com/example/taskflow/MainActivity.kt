@@ -15,6 +15,12 @@ import com.example.taskflow.presentation.task_list.TaskListViewModel
 import com.example.taskflow.presentation.theme.TaskFlowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.taskflow.presentation.trash.TrashScreen
+import com.example.taskflow.presentation.trash.TrashViewModel
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,16 +31,37 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: TaskListViewModel = hiltViewModel()
-                    val state by viewModel.state.collectAsState()
+                    val navController = rememberNavController()
                     
-                    TaskListScreen(
-                        state = state,
-                        onSearchQueryChange = viewModel::onSearchQueryChange,
-                        onTaskClick = { /* TODO: Navigate to Edit */ },
-                        onStatusChange = viewModel::onStatusChange,
-                        onAddTaskClick = { /* TODO: Navigate to Add */ }
-                    )
+                    NavHost(
+                        navController = navController,
+                        startDestination = "task_list"
+                    ) {
+                        composable("task_list") {
+                            val viewModel: TaskListViewModel = hiltViewModel()
+                            val state by viewModel.state.collectAsState()
+                            
+                            TaskListScreen(
+                                state = state,
+                                onSearchQueryChange = viewModel::onSearchQueryChange,
+                                onTaskClick = { /* TODO: Navigate to Edit */ },
+                                onStatusChange = viewModel::onStatusChange,
+                                onAddTaskClick = { /* TODO: Navigate to Add */ },
+                                onTrashClick = { navController.navigate("trash") }
+                            )
+                        }
+                        composable("trash") {
+                            val viewModel: TrashViewModel = hiltViewModel()
+                            val state by viewModel.state.collectAsState()
+                            
+                            TrashScreen(
+                                state = state,
+                                onRestoreTask = viewModel::restoreTask,
+                                onHardDeleteTask = viewModel::hardDeleteTask,
+                                onBackClick = { navController.popBackStack() }
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -15,6 +15,9 @@ import com.example.taskflow.presentation.components.EmptyStateView
 import com.example.taskflow.presentation.components.SearchBar
 import com.example.taskflow.presentation.components.TaskCard
 
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
@@ -23,12 +26,18 @@ fun TaskListScreen(
     onTaskClick: (Task) -> Unit,
     onStatusChange: (Task, Status) -> Unit,
     onAddTaskClick: () -> Unit,
+    onTrashClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("TaskFlow") }
+                title = { Text("TaskFlow") },
+                actions = {
+                    IconButton(onClick = onTrashClick) {
+                        Icon(Icons.Default.Delete, contentDescription = "Trash")
+                    }
+                }
             )
         },
         floatingActionButton = {
