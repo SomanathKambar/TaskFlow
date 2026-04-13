@@ -17,8 +17,7 @@ class CleanupWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L
-            val threshold = System.currentTimeMillis() - sevenDaysInMillis
+            val threshold = System.currentTimeMillis() - com.example.taskflow.util.Constants.CLEANUP_THRESHOLD_MS
             deleteOldTasksUseCase(threshold)
             Result.success()
         } catch (e: Exception) {

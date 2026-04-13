@@ -17,6 +17,9 @@ class TaskFlowApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+    
+    @Inject
+    lateinit var dataInitializer: com.example.taskflow.data.local.SampleDataInitializer
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -25,6 +28,7 @@ class TaskFlowApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        dataInitializer.initialize()
         scheduleCleanupWorker()
     }
 
