@@ -19,5 +19,7 @@ sealed class TaskDetailEvent {
     data class DescriptionChanged(val description: String) : TaskDetailEvent()
     data class CategoryChanged(val category: String) : TaskDetailEvent()
     data class PriorityChanged(val priority: Priority) : TaskDetailEvent()
+    data class StatusChanged(val status: Status) : TaskDetailEvent()
+    data class DueDateChanged(val dueDate: Long?) : TaskDetailEvent()
     object SaveTask : TaskDetailEvent()
 }

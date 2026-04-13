@@ -5,9 +5,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +32,7 @@ fun TrashScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
+    Scaffold (
         topBar = {
             TopAppBar(
                 title = { Text("Trash") },
@@ -50,7 +58,7 @@ fun TrashScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(state.deletedTasks, key = { it.id }) { task ->
-                    Card(
+                    Card (
                         modifier = Modifier.fillMaxWidth(),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
@@ -72,12 +80,12 @@ fun TrashScreen(
                                     )
                                 }
                             }
-                            IconButton(onClick = { onRestoreTask(task.id) }) {
-                                Icon(Icons.Default.Restore, contentDescription = "Restore")
+                            IconButton (onClick = { onRestoreTask(task.id) }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Restore")
                             }
                             IconButton(onClick = { onHardDeleteTask(task.id) }) {
                                 Icon(
-                                    Icons.Default.DeleteForever,
+                                    Icons.Default.Delete,
                                     contentDescription = "Permanent Delete",
                                     tint = MaterialTheme.colorScheme.error
                                 )

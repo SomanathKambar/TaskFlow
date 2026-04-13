@@ -10,6 +10,10 @@ import androidx.compose.ui.unit.dp
 import com.example.taskflow.domain.model.Status
 import com.example.taskflow.domain.model.Task
 
+import androidx.compose.ui.text.font.FontWeight
+import java.text.SimpleDateFormat
+import java.util.*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCard(
@@ -18,14 +22,21 @@ fun TaskCard(
     onStatusChange: (Task, Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+    
     Card(
         onClick = { onTaskClick(task) },
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (task.status == Status.COMPLETED) 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) 
+            else MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -36,28 +47,51 @@ fun TaskCard(
                     onStatusChange(task, newStatus)
                 }
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     PriorityIndicator(priority = task.priority)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = task.title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         textDecoration = if (task.status == Status.COMPLETED) {
                             TextDecoration.LineThrough
-                        } else null
+                        } else null,
+                        color = if (task.status == Status.COMPLETED)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurface
                     )
                 }
+                
                 if (!task.description.isNullOrBlank()) {
                     Text(
                         text = task.description,
                         style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1
+                        maxLines = 2,
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                CategoryChip(category = task.category)
+                
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CategoryChip(category = task.category)
+                    
+                    if (task.dueDate != null) {
+                        Text(
+                            text = "📅 ${dateFormat.format(Date(task.dueDate))}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
         }
     }

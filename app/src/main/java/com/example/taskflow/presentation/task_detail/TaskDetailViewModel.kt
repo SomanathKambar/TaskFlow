@@ -50,6 +50,7 @@ class TaskDetailViewModel @Inject constructor(
                         category = task.category,
                         priority = task.priority,
                         status = task.status,
+                        dueDate = task.dueDate,
                         isLoading = false
                     )
                 }
@@ -70,6 +71,12 @@ class TaskDetailViewModel @Inject constructor(
             }
             is TaskDetailEvent.PriorityChanged -> {
                 _state.update { it.copy(priority = event.priority) }
+            }
+            is TaskDetailEvent.StatusChanged -> {
+                _state.update { it.copy(status = event.status) }
+            }
+            is TaskDetailEvent.DueDateChanged -> {
+                _state.update { it.copy(dueDate = event.dueDate) }
             }
             TaskDetailEvent.SaveTask -> {
                 saveTask()
@@ -92,7 +99,7 @@ class TaskDetailViewModel @Inject constructor(
                 category = s.category,
                 priority = s.priority,
                 status = s.status,
-                dueDate = null, // Simplified for now
+                dueDate = s.dueDate,
                 createdAt = System.currentTimeMillis()
             )
 

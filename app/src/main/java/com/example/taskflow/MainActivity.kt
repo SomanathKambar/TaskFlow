@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
                                 state = state,
                                 onSearchQueryChange = viewModel::onSearchQueryChange,
                                 onSortChange = viewModel::onSortChange,
+                                onFilterChange = viewModel::onFilterChange,
                                 onTaskClick = { task -> navController.navigate("task_detail/${task.id}") },
                                 onStatusChange = viewModel::onStatusChange,
                                 onAddTaskClick = { navController.navigate("task_detail/new") },

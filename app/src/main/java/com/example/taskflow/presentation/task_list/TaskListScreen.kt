@@ -21,12 +21,15 @@ import androidx.compose.material.icons.filled.MoreVert
 import com.example.taskflow.domain.model.SortType
 import com.example.taskflow.presentation.task_list.components.FilterSortBar
 
+import com.example.taskflow.domain.model.Filter
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     state: TaskListUiState,
     onSearchQueryChange: (String) -> Unit,
     onSortChange: (SortType) -> Unit,
+    onFilterChange: (Filter?) -> Unit,
     onTaskClick: (Task) -> Unit,
     onStatusChange: (Task, Status) -> Unit,
     onAddTaskClick: () -> Unit,
@@ -62,7 +65,9 @@ fun TaskListScreen(
             
             FilterSortBar(
                 selectedSort = state.sortType,
-                onSortChange = onSortChange
+                onSortChange = onSortChange,
+                selectedFilter = state.selectedFilter,
+                onFilterChange = onFilterChange
             )
             
             if (state.tasks.isEmpty() && !state.isLoading) {
