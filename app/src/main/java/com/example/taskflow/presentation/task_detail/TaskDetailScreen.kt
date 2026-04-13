@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -170,7 +170,7 @@ fun TaskDetailScreen(
                             text = if (state.dueDate != null) dateFormat.format(Date(state.dueDate)) else "Pick a date",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                        Icon(Icons.Default.DateRange, contentDescription = null)
                     }
                 }
             }

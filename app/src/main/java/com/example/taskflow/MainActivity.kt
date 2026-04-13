@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
@@ -27,9 +29,16 @@ import com.example.taskflow.presentation.trash.TrashViewModel
 
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.taskflow.domain.model.Filter
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -41,11 +50,11 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
-                Scaffold(
+                Scaffold (
                     bottomBar = {
                         val showBottomBar = currentDestination?.route in listOf("task_list", "trash")
                         if (showBottomBar) {
-                            NavigationBar(
+                            NavigationBar (
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 tonalElevation = 8.dp
                             ) {
