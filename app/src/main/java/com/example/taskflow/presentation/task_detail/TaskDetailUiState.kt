@@ -11,7 +11,8 @@ data class TaskDetailUiState(
     val status: Status = Status.TODO,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val dueDate:Long? = null,
 )
 
 sealed class TaskDetailEvent {

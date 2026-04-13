@@ -25,60 +25,110 @@ import com.example.taskflow.presentation.task_detail.TaskDetailViewModel
 import com.example.taskflow.presentation.trash.TrashScreen
 import com.example.taskflow.presentation.trash.TrashViewModel
 
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Delete
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TaskFlowTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    
-                    NavHost(
-                        navController = navController,
-                        startDestination = "task_list"
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+
+                Scaffold(
+                    bottomBar = {
+                        val showBottomBar = currentDestination?.route in listOf("task_list", "trash")
+                        if (showBottomBar) {
+                            NavigationBar(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                tonalElevation = 8.dp
+                            ) {
+                                NavigationBarItem(
+                                    icon = { Icon(Icons.Default.List, contentDescription = null) },
+                                    label = { Text("Tasks") },
+                                    selected = currentDestination?.hierarchy?.any { it.route == "task_list" } == true,
+                                    onClick = {
+                                        navController.navigate("task_list") {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                )
+                                NavigationBarItem(
+                                    icon = { Icon(Icons.Default.Delete, contentDescription = null) },
+                                    label = { Text("Trash") },
+                                    selected = currentDestination?.hierarchy?.any { it.route == "trash" } == true,
+                                    onClick = {
+                                        navController.navigate("trash") {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                ) { innerPadding ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        composable("task_list") {
-                            val viewModel: TaskListViewModel = hiltViewModel()
-                            val state by viewModel.state.collectAsState()
-                            
-                            TaskListScreen(
-                                state = state,
-                                onSearchQueryChange = viewModel::onSearchQueryChange,
-                                onSortChange = viewModel::onSortChange,
-                                onFilterChange = viewModel::onFilterChange,
-                                onTaskClick = { task -> navController.navigate("task_detail/${task.id}") },
-                                onStatusChange = viewModel::onStatusChange,
-                                onAddTaskClick = { navController.navigate("task_detail/new") },
-                                onTrashClick = { navController.navigate("trash") }
-                            )
-                        }
-                        composable(
-                            route = "task_detail/{taskId}",
-                            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                        NavHost(
+                            navController = navController,
+                            startDestination = "task_list"
                         ) {
-                            val viewModel: TaskDetailViewModel = hiltViewModel()
-                            val state by viewModel.state.collectAsState()
-                            
-                            TaskDetailScreen(
-                                state = state,
-                                onEvent = viewModel::onEvent,
-                                onBackClick = { navController.popBackStack() }
-                            )
-                        }
-                        composable("trash") {
-                            val viewModel: TrashViewModel = hiltViewModel()
-                            val state by viewModel.state.collectAsState()
-                            
-                            TrashScreen(
-                                state = state,
-                                onRestoreTask = viewModel::restoreTask,
-                                onHardDeleteTask = viewModel::hardDeleteTask,
-                                onBackClick = { navController.popBackStack() }
-                            )
+                            composable("task_list") {
+                                val viewModel: TaskListViewModel = hiltViewModel()
+                                val state by viewModel.state.collectAsState()
+                                
+                                TaskListScreen(
+                                    state = state,
+                                    onSearchQueryChange = viewModel::onSearchQueryChange,
+                                    onFilterChange = { category -> 
+                                        viewModel.onFilterChange(category?.let { Filter(category = it) })
+                                    },
+                                    onTaskClick = { task -> navController.navigate("task_detail/${task.id}") },
+                                    onStatusChange = viewModel::onStatusChange,
+                                    onAddTaskClick = { navController.navigate("task_detail/new") }
+                                )
+                            }
+                            composable(
+                                route = "task_detail/{taskId}",
+                                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                            ) {
+                                val viewModel: TaskDetailViewModel = hiltViewModel()
+                                val state by viewModel.state.collectAsState()
+                                
+                                TaskDetailScreen(
+                                    state = state,
+                                    onEvent = viewModel::onEvent,
+                                    onBackClick = { navController.popBackStack() }
+                                )
+                            }
+                            composable("trash") {
+                                val viewModel: TrashViewModel = hiltViewModel()
+                                val state by viewModel.state.collectAsState()
+                                
+                                TrashScreen(
+                                    state = state,
+                                    onRestoreTask = viewModel::restoreTask,
+                                    onHardDeleteTask = viewModel::hardDeleteTask
+                                )
+                            }
                         }
                     }
                 }

@@ -2,21 +2,26 @@ package com.example.taskflow.presentation.task_detail
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Status
+import com.example.taskflow.presentation.components.FilterChips
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,17 +59,25 @@ fun TaskDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isLoading) "Loading..." else "Task Details") },
+                title = { Text("New Task", style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onEvent(TaskDetailEvent.SaveTask) }) {
-                        Icon(Icons.Default.Save, contentDescription = "Save")
+                    TextButton(
+                        onClick = { onEvent(TaskDetailEvent.SaveTask) },
+                        enabled = state.title.isNotBlank()
+                    ) {
+                        Text(
+                            text = "Save",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (state.title.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { paddingValues ->
@@ -72,83 +85,103 @@ fun TaskDetailScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            OutlinedTextField(
-                value = state.title,
-                onValueChange = { onEvent(TaskDetailEvent.TitleChanged(it)) },
-                label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = state.error != null && state.title.isBlank()
-            )
+            // Title
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Title", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                TextField(
+                    value = state.title,
+                    onValueChange = { onEvent(TaskDetailEvent.TitleChanged(it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
+                    ),
+                    placeholder = { Text("Enter task title...") },
+                    singleLine = true
+                )
+            }
 
-            OutlinedTextField(
-                value = state.description,
-                onValueChange = { onEvent(TaskDetailEvent.DescriptionChanged(it)) },
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3
-            )
+            // Description
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Description", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                TextField(
+                    value = state.description,
+                    onValueChange = { onEvent(TaskDetailEvent.DescriptionChanged(it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
+                    ),
+                    placeholder = { Text("Enter description...") },
+                    minLines = 3
+                )
+            }
 
-            OutlinedTextField(
-                value = state.category,
-                onValueChange = { onEvent(TaskDetailEvent.CategoryChanged(it)) },
-                label = { Text("Category") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Category
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                FilterChips(
+                    options = listOf("Work", "Personal", "Shopping", "General"),
+                    selectedOption = state.category,
+                    onOptionSelected = { it?.let { onEvent(TaskDetailEvent.CategoryChanged(it)) } }
+                )
+            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text("Due Date", style = MaterialTheme.typography.titleSmall)
-                    Text(
-                        text = if (state.dueDate != null) dateFormat.format(Date(state.dueDate)) else "No date set",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                IconButton(onClick = { datePickerDialog.show() }) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = "Pick Date")
+            // Priority
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    Priority.values().forEachIndexed { index, priority ->
+                        SegmentedButton(
+                            selected = state.priority == priority,
+                            onClick = { onEvent(TaskDetailEvent.PriorityChanged(priority)) },
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = Priority.values().size)
+                        ) {
+                            Text(priority.name.lowercase().replaceFirstChar { it.uppercase() })
+                        }
+                    }
                 }
             }
 
-            Text("Priority", style = MaterialTheme.typography.titleSmall)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Priority.values().forEach { priority ->
-                    FilterChip(
-                        selected = state.priority == priority,
-                        onClick = { onEvent(TaskDetailEvent.PriorityChanged(priority)) },
-                        label = { Text(priority.name) }
-                    )
+            // Due Date
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Due Date", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                OutlinedCard(
+                    onClick = { datePickerDialog.show() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (state.dueDate != null) dateFormat.format(Date(state.dueDate)) else "Pick a date",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                    }
                 }
             }
 
-            Text("Status", style = MaterialTheme.typography.titleSmall)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Status.values().forEach { status ->
-                    FilterChip(
-                        selected = state.status == status,
-                        onClick = { onEvent(TaskDetailEvent.StatusChanged(status)) },
-                        label = { Text(status.name.replace("_", " ")) }
-                    )
-                }
-            }
-
-            if (state.error != null) {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+            // Status
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Status", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                FilterChips(
+                    options = Status.values().map { it.name.replace("_", " ") },
+                    selectedOption = state.status.name.replace("_", " "),
+                    onOptionSelected = { it?.let { onEvent(TaskDetailEvent.StatusChanged(Status.valueOf(it.replace(" ", "_")))) } }
                 )
             }
         }
